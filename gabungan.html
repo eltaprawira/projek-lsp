@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<style>
+     body {
+      margin: 0;
+      font-family: sans-serif;
+      color: white;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 30px;
+      background-color: #ffffff;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 24px;
+      color: #222;
+    }
+
+    nav a {
+      margin-left: 20px;
+      text-decoration: none;
+      color: #333;
+      font-weight: 500;
+    }
+    .container1{
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px 30px;
+      gap: 400px;
+    }
+    .left{
+        max-width: 50%;
+    }
+    .left h2{
+      font-size: 36px;
+      margin-bottom: 10px;
+      color: black;
+    }
+    .left p{
+      color: black;
+    }
+    button {
+      background-color: #2196F3;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+    .right{
+        width: 30%;
+    }
+    
+    .right img {
+      max-width: 250px;
+      width: 100%;
+    }
+
+</style>
+<body>
+    <header>
+    <h1>Voting-kls</h1>
+    <nav>
+      <a href="#">Home</a>
+      <a href="#">Quick Count</a>
+      <a href="#">Login Pemilih</a>
+    </nav>
+  </header>
+  <div class="container1">
+    <div class="left">
+        <h2>Selamat Datang</h2>
+        <p>Diwebsite Pemilihan Struktur Kelas <br>Tentukan Pilihanmu dengan cara login dahulu </p>
+         <button onclick="location.href='#'">LOGIN UNTUK MEMILIH</button>
+    </div>
+    <div class="right">
+      <img src="vote.jpeg" alt="Voting Illustration">
+    </div>
+  </div>
+</body>
+</html>
