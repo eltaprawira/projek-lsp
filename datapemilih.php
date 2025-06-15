@@ -34,6 +34,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 
+
 </head>
 
 <body class="hold-transition sidebar-mini">
@@ -97,7 +98,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
               <a href="#" class="nav-link active">
                 <i class="nav-icon fas fa-table"></i>
                 <p>
-                  features
+                  Features
                   <i class="right fas fa-angle-left"></i>
                 </p>
               </a>
@@ -108,14 +109,13 @@ scratch. This page gets rid of all links and provides the needed markup only.
                     <p>Data Kelas</p>
                   </a>
                 </li>
-                 
+                
                 <li class="nav-item">
                   <a href="datapemilih.php" class="nav-link">
                     <i class="far fa-circle nav-icon"></i>
-                    <p>Data Pemilih</p>
+                    <p>Data Pemilihan</p>
                   </a>
                 </li>
-               
                
                 <li class="nav-item">
                   <a href="index3.php" class="nav-link">
@@ -140,185 +140,270 @@ scratch. This page gets rid of all links and provides the needed markup only.
       </div>
       <!-- /.sidebar -->
     </aside>
-
-    <!-- Tabel Data Kelas/Jurusan -->
+<!-- Content Wrapper -->
 <div class="content-wrapper">
+  <!-- Header -->
   <div class="content-header">
     <div class="container-fluid">
       <div class="row mb-2">
-        <div class="col-sm-6"><h1 class="m-0">Data Kelas/Jurusan</h1></div>
+        <div class="col-sm-6">
+          <h1 class="m-0">Data Pemilih</h1>
+        </div>
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-right">
             <li class="breadcrumb-item"><a href="#">Home</a></li>
-            <li class="breadcrumb-item active">Data Kelas/Jurusan</li>
+            <li class="breadcrumb-item active">Data Pemilih</li>
           </ol>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Modal Tambah/Edit -->
+  <!-- Modal Form -->
+   
   <div id="modalForm" style="display:none; position:fixed; top:20%; left:50%; transform:translateX(-50%); background:white; padding:20px; box-shadow:0 0 10px gray; z-index:999; width:300px;">
-    <h5 id="formTitle">Tambah/Edit Kelas</h5>
-    <input id="jurusanInput" class="form-control mb-2" placeholder="Jurusan"><br>
-    <input id="kelasInput" class="form-control mb-2" placeholder="Kelas"><br>
-    <input id="siswaInput" class="form-control mb-2" placeholder="Jumlah siswa"><br>
-    <textarea id="suaraInput" class="form-control mb-2" placeholder="Kandidat 1: 10&#10;Kandidat 2: 5"></textarea><br>
+    <h5 id="formTitle">Tambah/Edit Pemilih</h5>
+    <input type="text" id="nisInput" class="form-control mb-2" placeholder="NIS" oninput="generateKodeAkses()">
+    <input type="text" id="namaInput" class="form-control mb-2" placeholder="Nama Lengkap" oninput="generateKodeAkses()">
+    <input type="text" id="jurusanInput" class="form-control mb-2" placeholder="Jurusan" oninput="generateKodeAkses()">
+    <input type="text" id="kelasInput" class="form-control mb-2" placeholder="Kelas" oninput="generateKodeAkses()">
+    <select id="statusMemilihInput" class="form-control mb-2">
+      <option value="Belum Memilih">Belum Memilih</option>
+      <option value="Sudah Memilih">Sudah Memilih</option>
+    </select>
+    <input type="text" id="kodeAksesInput" class="form-control mb-2" placeholder="Kode Akses (Otomatis)" readonly>
     <button class="btn btn-success btn-sm" onclick="saveForm()">Simpan</button>
     <button class="btn btn-secondary btn-sm" onclick="hideFormModal()">Batal</button>
   </div>
 
-  <!-- Modal Konfirmasi Hapus -->
+  <!-- Modal Hapus -->
   <div id="modalDelete" style="display:none; position:fixed; top:30%; left:50%; transform:translateX(-50%); background:white; padding:20px; box-shadow:0 0 10px gray; z-index:999; width:280px;">
     <p>Yakin ingin menghapus data ini?</p>
     <button class="btn btn-danger btn-sm" onclick="deleteConfirmed()">Ya, Hapus</button>
     <button class="btn btn-secondary btn-sm" onclick="hideDeleteModal()">Batal</button>
   </div>
 
-  <!-- Tabel -->
-  <div class="content">
-    <div class="container-fluid">
-      <div class="card">
-        <div class="card-header clearfix">
-          <h3 class="card-title" style="float:left;">Data Kelas</h3>
-          <button class="btn btn-success btn-sm" style="float:right;" onclick="showFormModal()">+ Tambah</button>
-        </div>
-        <div class="card-body">
-          <table id="example100" class="table table-bordered">
-            <thead>
-              <tr>
-                <th>No</th><th>Jurusan</th><th>Kelas</th><th>Siswa</th><th>Suara</th><th>Aksi</th>
-              </tr>
-            </thead>
-            <tbody id="tableBody"></tbody>
-          </table>
-        </div>
+  <!-- Konten Tabel -->
+<div class="content">
+  <div class="container-fluid"> 
+    <div class="card">
+      <div class="card-header clearfix">
+        <h3 class="card-title" style="float:left;">Data Pemilih</h3>
+        <button class="btn btn-success btn-sm" style="float:right;" onclick="showFormModal()">+ Tambah</button>
+      </div>
+      <div class="card-body">
+        <table id="example100" class="table table-bordered">
+          <thead>
+            <tr>
+              <th>No</th><th>NIS</th><th>Nama Lengkap</th><th>Jurusan</th><th>Kelas</th><th>Status Memilih</th><th>Kode Akses</th><th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
       </div>
     </div>
   </div>
 </div>
-
-<!-- SCRIPT -->
 <script>
-  let editingId = null;
-  let deletingId = null;
+let editingIndex = null;
+let deletingIndex = null;
+let dataTable;
 
-  document.addEventListener('DOMContentLoaded', () => {
-    loadTable();
-  });
+document.addEventListener('DOMContentLoaded', () => {
+  refreshTable();
+});
 
-  function loadTable() {
-    fetch("kelas_backend.php")
-      .then(res => res.json())
-      .then(data => {
-        const tbody = document.getElementById('tableBody');
-        tbody.innerHTML = '';
+function getStoredData() {
+  return JSON.parse(localStorage.getItem("pemilihData")) || [];
+}
 
-        data.forEach((item, index) => {
-          const suaraText = (item.suara || []).join('<br>');
-          tbody.innerHTML += `
-            <tr>
-              <td>${index + 1}</td>
-              <td>${item.jurusan}</td>
-              <td>${item.kelas}</td>
-              <td>${item.siswa}</td>
-              <td>${suaraText}</td>
-              <td>
-                <button class="btn btn-sm btn-primary" onclick="editRow(${item.id})">Edit</button>
-                <button class="btn btn-sm btn-danger" onclick="confirmDelete(${item.id})">Hapus</button>
-              </td>
-            </tr>
-          `;
-        });
+function saveToStorage(data) {
+  localStorage.setItem("pemilihData", JSON.stringify(data));
+}
 
-        // Inisialisasi DataTables ulang
-        $('#example100').DataTable({
-          destroy: true,
-          responsive: true,
-          lengthChange: false,
-          autoWidth: false
-        });
-      });
+function generateKodeAkses() {
+  const nis = document.getElementById('nisInput').value.trim();
+  const nama = document.getElementById('namaInput').value.trim();
+  const jurusan = document.getElementById('jurusanInput').value.trim();
+  const kelas = document.getElementById('kelasInput').value.trim();
+  if (nis && nama && jurusan && kelas) {
+    const kode = btoa(nis + nama + jurusan + kelas).slice(0, 8);
+    document.getElementById('kodeAksesInput').value = kode;
   }
+}
 
-  function showFormModal() {
-    editingId = null;
-    document.getElementById('formTitle').innerText = "Tambah Kelas";
+function showFormModal(index = null) {
+  document.getElementById('modalForm').style.display = 'block';
+  editingIndex = index;
+
+  if (index !== null) {
+    const data = getStoredData()[index];
+    document.getElementById('nisInput').value = data.nis;
+    document.getElementById('namaInput').value = data.nama;
+    document.getElementById('jurusanInput').value = data.jurusan;
+    document.getElementById('kelasInput').value = data.kelas;
+    document.getElementById('statusMemilihInput').value = data.status_memilih;
+    document.getElementById('kodeAksesInput').value = data.kode_akses;
+  } else {
+    document.getElementById('nisInput').value = '';
+    document.getElementById('namaInput').value = '';
     document.getElementById('jurusanInput').value = '';
     document.getElementById('kelasInput').value = '';
-    document.getElementById('siswaInput').value = '';
-    document.getElementById('suaraInput').value = '';
-    document.getElementById('modalForm').style.display = 'block';
+    document.getElementById('statusMemilihInput').value = 'Belum Memilih';
+    document.getElementById('kodeAksesInput').value = '';
+  }
+}
+
+function hideFormModal() {
+  document.getElementById('modalForm').style.display = 'none';
+}
+
+function saveForm() {
+  const nis = document.getElementById('nisInput').value.trim();
+  const nama = document.getElementById('namaInput').value.trim();
+  const jurusan = document.getElementById('jurusanInput').value.trim();
+  const kelas = document.getElementById('kelasInput').value.trim();
+  const status_memilih = document.getElementById('statusMemilihInput').value.trim();
+  const kode_akses = document.getElementById('kodeAksesInput').value.trim();
+
+  if (!nis || !nama || !jurusan || !kelas || !status_memilih || !kode_akses) {
+    alert("Semua field harus diisi!");
+    return;
   }
 
-  function hideFormModal() {
-    document.getElementById('modalForm').style.display = 'none';
-  }
+  const data = new URLSearchParams();
+  data.append("action", "save");
+  data.append("nis", nis);
+  data.append("nama", nama);
+  data.append("jurusan", jurusan);
+  data.append("kelas", kelas);
+  data.append("status_memilih", status_memilih);
+  data.append("kode_akses", kode_akses);
 
-  function saveForm() {
-    const jurusan = document.getElementById('jurusanInput').value.trim();
-    const kelas = document.getElementById('kelasInput').value.trim();
-    const siswa = document.getElementById('siswaInput').value.trim();
-    const suaraRaw = document.getElementById('suaraInput').value.trim();
-    const suara = suaraRaw.split('\n').map(s => s.trim()).filter(Boolean).join('\n');
-
-    if (!jurusan || !kelas || !siswa) {
-      alert("Semua field harus diisi!");
-      return;
-    }
-
-    const formData = new FormData();
-    if (editingId !== null) formData.append("id", editingId);
-    formData.append("jurusan", jurusan);
-    formData.append("kelas", kelas);
-    formData.append("siswa", siswa);
-    formData.append("suara", suara);
-
-    fetch("kelas_backend.php", {
-      method: "POST",
-      body: formData
-    }).then(() => {
-      loadTable();
+  fetch('pemilih_backend.php', {
+    method: 'POST',
+    body: data
+  }).then(res => res.text())
+    .then(() => {
+      refreshTable();
       hideFormModal();
     });
-  }
+}
 
-  function editRow(id) {
-    fetch("kelas_backend.php")
-      .then(res => res.json())
-      .then(data => {
-        const item = data.find(d => d.id == id);
-        editingId = id;
-        document.getElementById('jurusanInput').value = item.jurusan;
-        document.getElementById('kelasInput').value = item.kelas;
-        document.getElementById('siswaInput').value = item.siswa;
-        document.getElementById('suaraInput').value = (item.suara || []).join('\n');
-        document.getElementById('formTitle').innerText = "Edit Kelas";
-        document.getElementById('modalForm').style.display = 'block';
-      });
-  }
 
-  function confirmDelete(id) {
-    deletingId = id;
-    document.getElementById('modalDelete').style.display = 'block';
-  }
+function loadTable() {
+  fetch('pemilih_backend.php', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+    body: 'action=load'
+  })
+  .then(res => res.json())
+  .then(data => {
+    const tbody = document.getElementById('tableBody');
+    tbody.innerHTML = '';
+    data.forEach((item, index) => {
+      tbody.innerHTML += `
+        <tr>
+          <td>${index + 1}</td>
+          <td>${item.nis}</td>
+          <td>${item.nama}</td>
+          <td>${item.jurusan}</td>
+          <td>${item.kelas}</td>
+          <td>${item.status_memilih}</td>
+          <td>${item.kode_akses}</td>
+          <td class="d-flex gap-1">
+            <button class="btn btn-sm btn-primary" onclick="editRow(${index})">Edit</button>
+            <button class="btn btn-sm btn-danger" onclick="confirmDelete('${item.nis}')">Hapus</button>
+          </td>
+        </tr>
+      `;
+    });
+    window.serverData = data; // untuk dipakai di editRow()
+  });
+}
+function editRow(index) {
+  const data = window.serverData[index];
+  showFormModal();
+  document.getElementById('nisInput').value = data.nis;
+  document.getElementById('namaInput').value = data.nama;
+  document.getElementById('jurusanInput').value = data.jurusan;
+  document.getElementById('kelasInput').value = data.kelas;
+  document.getElementById('statusMemilihInput').value = data.status_memilih;
+  document.getElementById('kodeAksesInput').value = data.kode_akses;
+  editingIndex = index;
+}
 
-  function hideDeleteModal() {
-    deletingId = null;
-    document.getElementById('modalDelete').style.display = 'none';
-  }
+function confirmDelete(nis) {
+  deletingIndex = nis;
+  document.getElementById('modalDelete').style.display = 'block';
+}
 
-  function deleteConfirmed() {
-    if (deletingId !== null) {
-      fetch("kelas_backend.php", {
-        method: "DELETE",
-        body: new URLSearchParams({ id: deletingId })
-      }).then(() => {
-        loadTable();
+function hideDeleteModal() {
+  deletingIndex = null;
+  document.getElementById('modalDelete').style.display = 'none';
+}
+
+function deleteConfirmed() {
+  if (deletingIndex !== null) {
+    const data = new URLSearchParams();
+    data.append("action", "delete");
+    data.append("nis", deletingIndex);
+
+    fetch('pemilih_backend.php', {
+      method: 'POST',
+      body: data
+    }).then(res => res.text())
+      .then(() => {
+        refreshTable();
         hideDeleteModal();
       });
-    }
   }
+}
+
+function refreshTable() {
+  fetch('pemilih_backend.php', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+    body: 'action=load'
+  })
+  .then(res => res.json())
+  .then(data => {
+    if ($.fn.DataTable.isDataTable('#example100')) {
+      $('#example100').DataTable().destroy();
+    }
+
+    const tbody = document.getElementById('tableBody');
+    tbody.innerHTML = '';
+    data.forEach((item, index) => {
+      tbody.innerHTML += `
+        <tr>
+          <td>${index + 1}</td>
+          <td>${item.nis}</td>
+          <td>${item.nama}</td>
+          <td>${item.jurusan}</td>
+          <td>${item.kelas}</td>
+          <td>${item.status_memilih}</td>
+          <td>${item.kode_akses}</td>
+          <td class="d-flex gap-1">
+            <button class="btn btn-sm btn-primary" onclick="editRow(${index})">Edit</button>
+            <button class="btn btn-sm btn-danger" onclick="confirmDelete('${item.nis}')">Hapus</button>
+          </td>
+        </tr>
+      `;
+    });
+
+    window.serverData = data;
+    initDataTable(); // Baru inisialisasi setelah data selesai dimasukkan
+  });
+}
+function initDataTable() {
+  dataTable = $('#example100').DataTable({
+    responsive: true,
+    lengthChange: false, // ini dimatikan supaya "Show entries" tidak muncul
+    autoWidth: false,
+    searching: true
+  });
+}
 </script>
           <!-- /.row -->
         </div><!-- /.container-fluid -->

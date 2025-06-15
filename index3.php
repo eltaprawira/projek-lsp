@@ -7,6 +7,36 @@ if(!isset($email)){
 }
 
 ?>
+
+<?php
+include 'koneksi.php';
+$data = mysqli_query($koneksi, "SELECT * FROM kandidat");
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['nama']) && isset($_POST['keterangan'])) {
+  $nama = $_POST['nama'];
+  $keterangan = $_POST['keterangan'];
+
+  // Proses upload foto
+  $fotoName = $_FILES['foto']['name'];
+  $fotoTmp = $_FILES['foto']['tmp_name'];
+
+  if (!empty($fotoName)) {
+    $folder = 'uploads/';
+    $namaBaru = time() . '_' . basename($fotoName);
+    $targetFile = $folder . $namaBaru;
+
+    if (move_uploaded_file($fotoTmp, $targetFile)) {
+      // Simpan ke database
+      $query = "INSERT INTO kandidat (nama, keterangan, foto) VALUES ('$nama', '$keterangan', '$namaBaru')";
+      mysqli_query($koneksi, $query);
+      echo "<script>alert('Data berhasil disimpan!'); location.href='index3.php';</script>";
+    } else {
+      echo "<script>alert('Gagal upload foto.');</script>";
+    }
+  } else {
+    echo "<script>alert('Foto belum dipilih.');</script>";
+  }
+}
+?>
 <!DOCTYPE html>
 <!--
 This is a starter template page. Use this page to start your new project from
@@ -92,19 +122,27 @@ scratch. This page gets rid of all links and provides the needed markup only.
                with font-awesome or any other icon font library -->
             <li class="nav-item menu-open">
               <a href="#" class="nav-link active">
-                <i class="nav-icon fas fa-tachometer-alt"></i>
+                <i class="nav-icon fas fa-table"></i>
                 <p>
-                  Starter Pages
+                  Features
                   <i class="right fas fa-angle-left"></i>
                 </p>
               </a>
               <ul class="nav nav-treeview">
                 <li class="nav-item">
-                  <a href="index2.php" class="nav-link active">
+                  <a href="index2.php" class="nav-link ">
                     <i class="far fa-circle nav-icon"></i>
                     <p>Data Kelas</p>
                   </a>
                 </li>
+                 
+                <li class="nav-item">
+                  <a href="datapemilih.php" class="nav-link">
+                    <i class="far fa-circle nav-icon"></i>
+                    <p>Data Pemilih</p>
+                  </a>
+                </li>
+               
 
                 <li class="nav-item">
                   <a href="index3.php" class="nav-link">
@@ -114,15 +152,6 @@ scratch. This page gets rid of all links and provides the needed markup only.
                 </li>
                 
               </ul>
-            </li>
-            <li class="nav-item">
-              <a href="#" class="nav-link">
-                <i class="nav-icon fas fa-th"></i>
-                <p>
-                  Simple Link
-                  <span class="right badge badge-danger">New</span>
-                </p>
-              </a>
             </li>
 
             <li class="nav-item">
@@ -141,208 +170,124 @@ scratch. This page gets rid of all links and provides the needed markup only.
     </aside>
 
     <!-- Content Wrapper. Contains page content -->
-    <div class="content-wrapper">
-      <!-- Content Header (Page header) -->
-      <div class="content-header">
-        <div class="container-fluid">
-          <div class="row mb-2">
-            <div class="col-sm-6">
-              <h1 class="m-0">Data Kelas</h1>
-            </div><!-- /.col -->
-            <div class="col-sm-6">
-              <ol class="breadcrumb float-sm-right">
-                <li class="breadcrumb-item"><a href="#">Home</a></li>
-                <li class="breadcrumb-item active">Data Kelas</li>
-              </ol>
-            </div><!-- /.col -->
-          </div><!-- /.row -->
-        </div><!-- /.container-fluid -->
+<div class="content-wrapper">
+  <!-- Content Header -->
+  <div class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1 class="m-0">Data Kandidat</h1>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-right">
+            <li class="breadcrumb-item"><a href="#">Home</a></li>
+            <li class="breadcrumb-item active">Data Kandidat</li>
+          </ol>
+        </div>
       </div>
-      <!-- /.content-header -->
+    </div>
+  </div>
 
-      <!-- Main content -->
+<!-- Konten Halaman -->
 <div class="content">
   <div class="container-fluid">
-    <div class="card">
+    <div class="card mb-4">
       <div class="card-header clearfix">
         <h3 class="card-title" style="float: left;">Data Kandidat</h3>
-        <button class="btn btn-success btn-sm" style="float: right;" onclick="showFormModal()">+ Tambah</button>
+        <button class="btn btn-success btn-sm float-end" onclick="showFormModal()">+ Tambah Kandidat</button>
       </div>
 
+      <div class="card-body">
+  <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4" id="cardContainer">
+    <?php
+    $no = 1;
+    while ($d = mysqli_fetch_array($data)) :
+      $kandidatKe = ($no % 2 == 1) ? 1 : 2;
+    ?>
+    <div class="col">
+      <div class="card h-100 shadow-sm border-success">
+        <img src="uploads/<?= htmlspecialchars($d['foto']) ?>" class="card-img-top" alt="Foto Kandidat" style="object-fit: cover; height: 250px;">
+        <div class="card-body text-center">
+          <h5 class="card-title text-success">Kandidat <?= $kandidatKe ?></h5><br>
+          <p class="fw-bold mb-1">Nama:</p>
+          <p><?= htmlspecialchars($d['nama']) ?></p>
+          <p class="fw-bold mb-1">Keterangan:</p>
+          <p><?= nl2br(htmlspecialchars($d['keterangan'])) ?></p>
+        </div>
+        <div class="card-footer d-flex justify-content-between">
+          <button class="btn btn-warning btn-sm" onclick="showFormModal(<?= $d['id'] ?>)">Edit</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteItem(<?= $d['id'] ?>)">Hapus</button>
+        </div>
+      </div>
+    </div>
+    <?php $no++; endwhile; ?>
+  </div>
+</div>
     </div>
   </div>
 </div>
 
 <!-- Modal Form Tambah/Edit -->
-<div id="modalForm" style="display:none; position: fixed; top: 20%; left: 50%; transform: translateX(-50%); background: white; padding: 20px; box-shadow: 0 0 10px gray; z-index: 999; width: 300px;">
-  <h5 id="formTitle">Tambah Siswa</h5>
-  <input type="text" id="namaInput" class="form-control mb-2" placeholder="Nama Siswa">
-  <input type="text" id="kelasInput" class="form-control mb-2" placeholder="Kelas">
-  <button class="btn btn-success btn-sm" onclick="saveForm()">Simpan</button>
-  <button class="btn btn-secondary btn-sm" onclick="hideFormModal()">Batal</button>
-</div>
-
-<!-- Modal Konfirmasi Hapus -->
-<div id="modalDelete" style="display:none; position: fixed; top: 30%; left: 50%; transform: translateX(-50%); background: white; padding: 20px; box-shadow: 0 0 10px gray; z-index: 999; width: 280px;">
-  <p>Yakin ingin menghapus data ini?</p>
-  <button class="btn btn-danger btn-sm" onclick="deleteConfirmed()">Ya, Hapus</button>
-  <button class="btn btn-secondary btn-sm" onclick="hideDeleteModal()">Batal</button>
+<div id="modalForm" style="display:none; position: fixed; top: 20%; left: 50%; transform: translateX(-50%); background: white; padding: 20px; box-shadow: 0 0 10px gray; z-index: 999; width: 320px;">
+  <h5 id="formTitle">Tambah Kandidat</h5>
+  <form id="formKandidat" enctype="multipart/form-data">
+    <input type="hidden" name="id" id="idEdit">
+    <input type="hidden" name="oldFoto" id="fotoLama">
+    <input type="text" name="nama" id="namaInput" class="form-control mb-2" placeholder="Nama Kandidat" required>
+    <textarea name="keterangan" id="ketInput" class="form-control mb-2" placeholder="Keterangan Kandidat" required></textarea>
+    <input type="file" name="foto" id="fotoInput" class="form-control mb-2">
+    <div class="d-flex justify-content-between mt-2">
+      <button type="button" class="btn btn-success btn-sm" onclick="saveForm()">Simpan</button>
+      <button type="button" class="btn btn-secondary btn-sm" onclick="hideFormModal()">Batal</button>
+    </div>
+  </form>
 </div>
 
 <script>
-  let rowNumber = 2;
-  let editingRow = null;
-  let deletingRow = null;
+function showFormModal(id = null) {
+  const modal = document.getElementById('modalForm');
+  document.getElementById('formTitle').innerText = id ? "Edit Kandidat" : "Tambah Kandidat";
+  document.getElementById('formKandidat').reset();
+  document.getElementById('fotoLama').value = '';
+  document.getElementById('idEdit').value = '';
 
-  function showFormModal(editBtn = null) {
-    document.getElementById('modalForm').style.display = 'block';
-    if (editBtn) {
-      document.getElementById('formTitle').textContent = "Edit Siswa";
-      editingRow = editBtn.parentNode.parentNode;
-      document.getElementById('namaInput').value = editingRow.cells[1].textContent;
-      document.getElementById('kelasInput').value = editingRow.cells[2].textContent;
-    } else {
-      document.getElementById('formTitle').textContent = "Tambah Siswa";
-      editingRow = null;
-      document.getElementById('namaInput').value = '';
-      document.getElementById('kelasInput').value = '';
-    }
-  }
-
-  function hideFormModal() {
-    document.getElementById('modalForm').style.display = 'none';
-  }
-
-  function saveForm() {
-    const nama = document.getElementById('namaInput').value.trim();
-    const kelas = document.getElementById('kelasInput').value.trim();
-
-    if (!nama || !kelas) {
-      alert("Nama dan Kelas harus diisi.");
-      return;
-    }
-
-    if (editingRow) {
-      editingRow.cells[1].textContent = nama;
-      editingRow.cells[2].textContent = kelas;
-      editingRow.cells[3].textContent = "1";
-    } else {
-      const tbody = document.getElementById('tableBody');
-      const newRow = document.createElement('tr');
-      newRow.innerHTML = `
-        <td>${rowNumber++}.</td>
-        <td>${nama}</td>
-        <td>${kelas}</td>
-        <td>1</td>
-        <td>
-          <button class="btn btn-sm btn-primary" onclick="editRow(this)">Edit</button>
-          <button class="btn btn-sm btn-danger" onclick="confirmDelete(this)">Hapus</button>
-        </td>
-      `;
-      tbody.appendChild(newRow);
-    }
-
-    hideFormModal();
-  }
-
-  function editRow(btn) {
-    showFormModal(btn);
-  }
-
-  function confirmDelete(btn) {
-    deletingRow = btn.parentNode.parentNode;
-    document.getElementById('modalDelete').style.display = 'block';
-  }
-
-  function deleteConfirmed() {
-    if (deletingRow) {
-      deletingRow.remove();
-      rowNumber = 1;
-      document.querySelectorAll("#tableBody tr").forEach((tr) => {
-        tr.cells[0].textContent = `${rowNumber++}.`;
+  if (id) {
+    fetch('get_kandidat.php?id=' + id)
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById('namaInput').value = data.nama;
+        document.getElementById('ketInput').value = data.keterangan;
+        document.getElementById('fotoLama').value = data.foto;
+        document.getElementById('idEdit').value = id;
       });
-    }
-    hideDeleteModal();
   }
 
-  function hideDeleteModal() {
-    document.getElementById('modalDelete').style.display = 'none';
-    deletingRow = null;
+  modal.style.display = 'block';
+}
+
+function hideFormModal() {
+  document.getElementById('modalForm').style.display = 'none';
+}
+
+function saveForm() {
+  const form = document.getElementById('formKandidat');
+  const formData = new FormData(form);
+  const id = formData.get('id');
+  const endpoint = id ? 'kandidat_backend.php?aksi=edit' : 'kandidat_backend.php?aksi=tambah';
+
+  fetch(endpoint, { method: 'POST', body: formData })
+    .then(res => res.text())
+    .then(() => location.reload());
+}
+
+function deleteItem(id) {
+  if (confirm("Yakin ingin menghapus kandidat ini?")) {
+    fetch('kandidat_backend.php?aksi=hapus&id=' + id)
+      .then(() => location.reload());
   }
+}
 </script>
-  <!-- Modal Form Tambah -->
-  <div id="modalForm" style="display: none; position: fixed; top:20%; left:50%; transform: translateX(-50%); background: white; padding: 20px; box-shadow: 0 0 10px gray; z-index: 999;">
-    <h5>Tambah Siswa</h5>
-    <input type="text" id="namaInput" class="form-control mb-2" placeholder="Nama Siswa">
-    <input type="text" id="kelasInput" class="form-control mb-2" placeholder="Kelas">
-    <input type="number" id="suaraInput" class="form-control mb-2" placeholder="Jumlah Suara">
-    <button class="btn btn-success btn-sm" onclick="addRow()">Simpan</button>
-    <button class="btn btn-secondary btn-sm" onclick="hideAddModal()">Batal</button>
-  </div>
-
-  <script>
-    let rowNumber = 2; // karena sudah ada 1 baris awal
-
-    function showAddModal() {
-      document.getElementById('modalForm').style.display = 'block';
-    }
-
-    function hideAddModal() {
-      document.getElementById('modalForm').style.display = 'none';
-      document.getElementById('namaInput').value = '';
-      document.getElementById('kelasInput').value = '';
-      document.getElementById('suaraInput').value = '';
-    }
-
-    function addRow() {
-      const nama = document.getElementById('namaInput').value;
-      const kelas = document.getElementById('kelasInput').value;
-      const suara = document.getElementById('suaraInput').value;
-
-      if (!nama || !kelas || !suara) {
-        alert("Semua field harus diisi!");
-        return;
-      }
-
-      const tbody = document.getElementById('tableBody');
-      const newRow = document.createElement('tr');
-      newRow.innerHTML = `
-        <td>${rowNumber++}.</td>
-        <td>${nama}</td>
-        <td>${kelas}</td>
-        <td>${suara}</td>
-        <td>
-          <button class="btn btn-sm btn-primary" onclick="editRow(this)">Edit</button>
-          <button class="btn btn-sm btn-danger" onclick="deleteRow(this)">Hapus</button>
-        </td>
-      `;
-      tbody.appendChild(newRow);
-      hideAddModal();
-    }
-
-    function deleteRow(btn) {
-      const row = btn.parentNode.parentNode;
-      row.remove();
-      rowNumber = 1;
-      document.querySelectorAll("#tableBody tr").forEach((tr) => {
-        tr.cells[0].textContent = `${rowNumber++}.`;
-      });
-    }
-
-    function editRow(btn) {
-      const row = btn.parentNode.parentNode;
-      const nama = prompt("Edit Nama Siswa:", row.cells[1].textContent);
-      const kelas = prompt("Edit Kelas:", row.cells[2].textContent);
-      const suara = prompt("Edit Jumlah Suara:", row.cells[3].textContent);
-
-      if (nama !== null && kelas !== null && suara !== null) {
-        row.cells[1].textContent = nama;
-        row.cells[2].textContent = kelas;
-        row.cells[3].textContent = suara;
-      }
-    }
-  </script>
-
+</body>
           <!-- /.row -->
         </div><!-- /.container-fluid -->
       </div>

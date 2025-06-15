@@ -7,6 +7,26 @@ if(!isset($email)){
 }
 
 ?>
+<?php
+// Koneksi ke database
+$koneksi = mysqli_connect("localhost", "root", "root", "pemilihan_struktur_kelas");
+
+// Hitung jumlah total pemilih
+$jumlahPemilih = mysqli_num_rows(mysqli_query($koneksi, "SELECT * FROM data_pemilih"));
+
+// Hitung jumlah yang sudah memilih (status_memilih != 'belum')
+$jumlahSudahMemilih = mysqli_num_rows(mysqli_query($koneksi, "SELECT * FROM data_pemilih WHERE status_memilih != 'belum'"));
+
+// Hitung jumlah yang belum memilih
+$jumlahBelumMemilih = $jumlahPemilih - $jumlahSudahMemilih;
+
+// Hitung jumlah kandidat
+$jumlahKandidat = mysqli_num_rows(mysqli_query($koneksi, "SELECT * FROM kandidat"));
+
+// Hitung persentase untuk progress bar
+$persenMemilih = $jumlahPemilih > 0 ? round(($jumlahSudahMemilih / $jumlahPemilih) * 100) : 0;
+$persenBelum = 100 - $persenMemilih;
+?>
 <!DOCTYPE html>
 <!--
 This is a starter template page. Use this page to start your new project from
@@ -77,7 +97,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
         <!-- Dashboard Menu -->
         <ul class="nav nav-pills nav-sidebar flex-column" role="menu">
             <li class="nav-item">
-            <a href="#" class="nav-link active">
+            <a href="logout.php" class="nav-link active">
                 <i class="nav-icon fas fa-tachometer-alt"></i>
                 <p>Dashboard</p>
             </a>
@@ -94,38 +114,32 @@ scratch. This page gets rid of all links and provides the needed markup only.
                with font-awesome or any other icon font library -->
             <li class="nav-item menu-open">
               <a href="#" class="nav-link active">
-                <i class="nav-icon fas fa-tachometer-alt"></i>
+                <i class="nav-icon fas fa-table"></i>
                 <p>
-                  Starter Pages
+                  Features
                   <i class="right fas fa-angle-left"></i>
                 </p>
               </a>
               <ul class="n  av nav-treeview">
                 <li class="nav-item">
-                  <a href="index2.php" class="nav-link active">
+                  <a href="index2.php" class="nav-link ">
                     <i class="far fa-circle nav-icon"></i>
                     <p>Data Kelas</p>
                   </a>
                 </li>
                 <li class="nav-item">
-                  <a href="index3.php" class="nav-link">
+                  <a href="datapemilih.php" class="nav-link ">
+                    <i class="far fa-circle nav-icon"></i>
+                    <p>Data Pemilih</p>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a href="index3.php" class="nav-link ">
                     <i class="far fa-circle nav-icon"></i>
                     <p>Data Kandidat</p>
                   </a>
                 </li>
-                
               </ul>
-            </li>
-            <li class="nav-item">
-              <a href="#" class="nav-link">
-                <i class="nav-icon fas fa-th"></i>
-                <p>
-                  Simple Link
-                  <span class="right badge badge-danger">New</span>
-                </p>
-              </a>
-            </li>
-
             <li class="nav-item">
               <a href="logout.php" class="nav-link">
                 <i class="nav-icon fas fa-th"></i>
@@ -148,109 +162,99 @@ scratch. This page gets rid of all links and provides the needed markup only.
                 <div class="container-fluid">
                 <div class="row mb-2">
                     <div class="col-sm-6">
-                    <h1 class="m-0">Dashboard v2</h1>
+                    <h1 class="m-0">Dashboard </h1>
                     </div>
                     <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
                         <li class="breadcrumb-item"><a href="#">Home</a></li>
-                        <li class="breadcrumb-item active">Dashboard v2</li>
+                        <li class="breadcrumb-item active">Dashboard </li>
                     </ol>
                     </div>
                 </div>
                 </div>
             </div>
-            <!-- /.content-header -->
-
+                        <!-- /.content-header -->
             <!-- Bagian utama -->
-            <div class="container-fluid px-4"> <!-- Tambah padding kiri-kanan -->
-                
-                <!-- Baris info-box -->
-                <div class="row">
-                <!-- Kolom-kolom info-box -->
+            <div class="container-fluid px-4">
+            <!-- Baris info-box -->
+            <div class="row">
+                <!-- Jumlah Pemilih -->
                 <div class="col-12 col-sm-6 col-md-6">
-                    <div class="info-box mb-3">
+                <div class="info-box mb-3">
                     <span class="info-box-icon bg-primary elevation-1"><i class="fas fa-users"></i></span>
                     <div class="info-box-content">
-                        <span class="info-box-text">Total Orang</span>
-                        <span class="info-box-number">5,000</span>
-                    </div>
+                    <span class="info-box-text">Jumlah Pemilih</span>
+                    <span class="info-box-number"><?= $jumlahPemilih ?></span>
                     </div>
                 </div>
+                </div>
 
+                <!-- Sudah Memilih -->
                 <div class="col-12 col-sm-6 col-md-6">
-                    <div class="info-box mb-3">
+                <div class="info-box mb-3">
                     <span class="info-box-icon bg-success elevation-1"><i class="fas fa-user-check"></i></span>
                     <div class="info-box-content">
-                        <span class="info-box-text">Sudah Terverifikasi</span>
-                        <span class="info-box-number">3,500</span>
-                    </div>
+                    <span class="info-box-text">Yang Sudah Memilih</span>
+                    <span class="info-box-number"><?= $jumlahSudahMemilih ?></span>
                     </div>
                 </div>
+                </div>
 
+                <!-- Jumlah Kandidat -->
                 <div class="col-12 col-sm-6 col-md-6">
-                    <div class="info-box mb-3">
+                <div class="info-box mb-3">
                     <span class="info-box-icon bg-warning elevation-1"><i class="fas fa-user-graduate"></i></span>
                     <div class="info-box-content">
-                        <span class="info-box-text">Mahasiswa/Wisudawan</span>
-                        <span class="info-box-number">1,200</span>
-                    </div>
+                    <span class="info-box-text">Jumlah Kandidat</span>
+                    <span class="info-box-number"><?= $jumlahKandidat ?></span>
                     </div>
                 </div>
+                </div>
 
+                <!-- Belum Memilih -->
                 <div class="col-12 col-sm-6 col-md-6">
-                    <div class="info-box mb-3">
-                    <span class="info-box-icon bg-danger elevation-1"><i class="fas fa-user"></i></span>
+                <div class="info-box mb-3">
+                    <span class="info-box-icon bg-danger elevation-1"><i class="fas fa-user-times"></i></span>
                     <div class="info-box-content">
-                        <span class="info-box-text">Pengguna Umum</span>
-                        <span class="info-box-number">2,000</span>
-                    </div>
+                    <span class="info-box-text">Yang Belum Memilih</span>
+                    <span class="info-box-number"><?= $jumlahBelumMemilih ?></span>
                     </div>
                 </div>
                 </div>
+            </div>
 
-                <!-- CARD GOAL COMPLETION -->
-                <div class="card mb-4">
+            <!-- CARD GOAL COMPLETION -->
+            <div class="card mb-4">
                 <div class="card-header">
-                    <h3 class="card-title text-center w-100"><strong>Goal Completion</strong></h3>
+                <h3 class="card-title text-center w-100"><strong>Goal Completion</strong></h3>
                 </div>
                 <div class="card-body">
-                    <div class="progress-group mb-4">
-                    Add Products to Cart
-                    <span class="float-right"><b>160</b>/200</span>
+                <div class="progress-group mb-4">
+                    Sudah Memilih
+                    <span class="float-right"><b><?= $jumlahSudahMemilih ?></b>/<?= $jumlahPemilih ?></span>
                     <div class="progress progress-sm">
-                        <div class="progress-bar bg-primary" style="width: 80%"></div>
+                    <div class="progress-bar bg-success" style="width: <?= $persenMemilih ?>%"></div>
                     </div>
-                    </div>
+                </div>
 
-                    <div class="progress-group mb-4">
-                    Complete Purchase
-                    <span class="float-right"><b>310</b>/400</span>
+                <div class="progress-group mb-4">
+                    Belum Memilih
+                    <span class="float-right"><b><?= $jumlahBelumMemilih ?></b>/<?= $jumlahPemilih ?></span>
                     <div class="progress progress-sm">
-                        <div class="progress-bar bg-danger" style="width: 75%"></div>
+                    <div class="progress-bar bg-danger" style="width: <?= $persenBelum ?>%"></div>
                     </div>
-                    </div>
+                </div>
 
-                    <div class="progress-group mb-4">
-                    <span class="progress-text">Visit Premium Page</span>
-                    <span class="float-right"><b>480</b>/800</span>
+                <div class="progress-group mb-4">
+                    Jumlah Kandidat Terdaftar
+                    <span class="float-right"><b><?= $jumlahKandidat ?></b></span>
                     <div class="progress progress-sm">
-                        <div class="progress-bar bg-success" style="width: 60%"></div>
-                    </div>
-                    </div>
-
-                    <div class="progress-group">
-                    Send Inquiries
-                    <span class="float-right"><b>250</b>/500</span>
-                    <div class="progress progress-sm">
-                        <div class="progress-bar bg-warning" style="width: 50%"></div>
-                    </div>
+                    <div class="progress-bar bg-warning" style="width: 100%"></div>
                     </div>
                 </div>
                 </div>
-                <!-- END CARD -->
-
-
-            </div> <!-- /.container-fluid -->
+            </div>
+            </div>
 
             </div>
             </div>
