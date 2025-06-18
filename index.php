@@ -3,7 +3,8 @@
 session_start();
 $email = $_SESSION['email'];
 if(!isset($email)){
-  header('Location:login.php');
+  header('Location:login-admin.php');
+  
 }
 
 ?>
@@ -14,11 +15,11 @@ $koneksi = mysqli_connect("localhost", "root", "root", "pemilihan_struktur_kelas
 // Hitung jumlah total pemilih
 $jumlahPemilih = mysqli_num_rows(mysqli_query($koneksi, "SELECT * FROM data_pemilih"));
 
-// Hitung jumlah yang sudah memilih (status_memilih != 'belum')
-$jumlahSudahMemilih = mysqli_num_rows(mysqli_query($koneksi, "SELECT * FROM data_pemilih WHERE status_memilih != 'belum'"));
+// Hitung jumlah yang sudah memilih
+$jumlahSudahMemilih = mysqli_num_rows(mysqli_query($koneksi, "SELECT * FROM data_pemilih WHERE status_memilih != 'belum memilih'"));
 
 // Hitung jumlah yang belum memilih
-$jumlahBelumMemilih = $jumlahPemilih - $jumlahSudahMemilih;
+$jumlahBelumMemilih = mysqli_num_rows(mysqli_query($koneksi, "SELECT * FROM data_pemilih WHERE status_memilih = 'belum memilih'"));
 
 // Hitung jumlah kandidat
 $jumlahKandidat = mysqli_num_rows(mysqli_query($koneksi, "SELECT * FROM kandidat"));
@@ -37,7 +38,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>AdminLTE 3 | Starter</title>
+  <title></title>
 
   <!-- Google Font: Source Sans Pro -->
   <link rel="stylesheet"
@@ -76,11 +77,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
 
     <!-- Main Sidebar Container -->
     <aside class="main-sidebar sidebar-dark-primary elevation-4">
-      <!-- Brand Logo -->
-      <a href="index3.html" class="brand-link">
-        <img src="theme/dist/img/AdminLTELogo.png" alt="AdminLTE Logo" class="brand-image img-circle elevation-3"
-          style="opacity: .8">
-        <span class="brand-text font-weight-light">AdminLTE 3</span>
+      
       </a>
         <!-- Sidebar -->
         <div class="sidebar">

@@ -3,7 +3,7 @@
 session_start();
 $email = $_SESSION['email'];
 if(!isset($email)){
-  header('Location:login.php');
+  header('Location:login-admin.php');
 }
 
 ?>
@@ -17,7 +17,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>AdminLTE 3 | Starter</title>
+  <title></title>
 
   <!-- Google Font: Source Sans Pro -->
   <link rel="stylesheet"
@@ -58,12 +58,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
 
     <!-- Main Sidebar Container -->
     <aside class="main-sidebar sidebar-dark-primary elevation-4">
-      <!-- Brand Logo -->
-      <a href="index3.html" class="brand-link">
-        <img src="theme/dist/img/AdminLTELogo.png" alt="AdminLTE Logo" class="brand-image img-circle elevation-3"
-          style="opacity: .8">
-        <span class="brand-text font-weight-light">AdminLTE 3</span>
-      </a>
+     
 
       <!-- Sidebar -->
       <div class="sidebar">
@@ -163,6 +158,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
    
   <div id="modalForm" style="display:none; position:fixed; top:20%; left:50%; transform:translateX(-50%); background:white; padding:20px; box-shadow:0 0 10px gray; z-index:999; width:300px;">
     <h5 id="formTitle">Tambah/Edit Pemilih</h5>
+    <input type="hidden" id="originalNisInput">
     <input type="text" id="nisInput" class="form-control mb-2" placeholder="NIS" oninput="generateKodeAkses()">
     <input type="text" id="namaInput" class="form-control mb-2" placeholder="Nama Lengkap" oninput="generateKodeAkses()">
     <input type="text" id="jurusanInput" class="form-control mb-2" placeholder="Jurusan" oninput="generateKodeAkses()">
@@ -204,6 +200,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
     </div>
   </div>
 </div>
+<!-- Script -->
 <script>
 let editingIndex = null;
 let deletingIndex = null;
@@ -212,14 +209,6 @@ let dataTable;
 document.addEventListener('DOMContentLoaded', () => {
   refreshTable();
 });
-
-function getStoredData() {
-  return JSON.parse(localStorage.getItem("pemilihData")) || [];
-}
-
-function saveToStorage(data) {
-  localStorage.setItem("pemilihData", JSON.stringify(data));
-}
 
 function generateKodeAkses() {
   const nis = document.getElementById('nisInput').value.trim();
@@ -235,10 +224,10 @@ function generateKodeAkses() {
 function showFormModal(index = null) {
   document.getElementById('modalForm').style.display = 'block';
   editingIndex = index;
-
   if (index !== null) {
-    const data = getStoredData()[index];
+    const data = window.serverData[index];
     document.getElementById('nisInput').value = data.nis;
+    document.getElementById('originalNisInput').value = data.nis; // NIS lama
     document.getElementById('namaInput').value = data.nama;
     document.getElementById('jurusanInput').value = data.jurusan;
     document.getElementById('kelasInput').value = data.kelas;
@@ -246,10 +235,11 @@ function showFormModal(index = null) {
     document.getElementById('kodeAksesInput').value = data.kode_akses;
   } else {
     document.getElementById('nisInput').value = '';
+    document.getElementById('originalNisInput').value = '';
     document.getElementById('namaInput').value = '';
     document.getElementById('jurusanInput').value = '';
     document.getElementById('kelasInput').value = '';
-    document.getElementById('statusMemilihInput').value = 'Belum Memilih';
+    document.getElementById('statusMemilihInput').value = 'belum memilih';
     document.getElementById('kodeAksesInput').value = '';
   }
 }
@@ -265,6 +255,7 @@ function saveForm() {
   const kelas = document.getElementById('kelasInput').value.trim();
   const status_memilih = document.getElementById('statusMemilihInput').value.trim();
   const kode_akses = document.getElementById('kodeAksesInput').value.trim();
+  const original_nis = document.getElementById('originalNisInput').value.trim();
 
   if (!nis || !nama || !jurusan || !kelas || !status_memilih || !kode_akses) {
     alert("Semua field harus diisi!");
@@ -279,6 +270,7 @@ function saveForm() {
   data.append("kelas", kelas);
   data.append("status_memilih", status_memilih);
   data.append("kode_akses", kode_akses);
+  data.append("original_nis", original_nis);
 
   fetch('pemilih_backend.php', {
     method: 'POST',
@@ -290,8 +282,7 @@ function saveForm() {
     });
 }
 
-
-function loadTable() {
+function refreshTable() {
   fetch('pemilih_backend.php', {
     method: 'POST',
     headers: {'Content-Type': 'application/x-www-form-urlencoded'},
@@ -299,9 +290,17 @@ function loadTable() {
   })
   .then(res => res.json())
   .then(data => {
+    if ($.fn.DataTable.isDataTable('#example100')) {
+      $('#example100').DataTable().destroy();
+    }
+
     const tbody = document.getElementById('tableBody');
     tbody.innerHTML = '';
-    data.forEach((item, index) => {
+
+    // Tampilkan hanya yang "belum memilih"
+    const filteredData = data.filter(item => item.status_memilih.toLowerCase() === 'belum memilih');
+
+    filteredData.forEach((item, index) => {
       tbody.innerHTML += `
         <tr>
           <td>${index + 1}</td>
@@ -318,19 +317,19 @@ function loadTable() {
         </tr>
       `;
     });
-    window.serverData = data; // untuk dipakai di editRow()
+
+    window.serverData = filteredData;
+    initDataTable();
   });
 }
-function editRow(index) {
-  const data = window.serverData[index];
-  showFormModal();
-  document.getElementById('nisInput').value = data.nis;
-  document.getElementById('namaInput').value = data.nama;
-  document.getElementById('jurusanInput').value = data.jurusan;
-  document.getElementById('kelasInput').value = data.kelas;
-  document.getElementById('statusMemilihInput').value = data.status_memilih;
-  document.getElementById('kodeAksesInput').value = data.kode_akses;
-  editingIndex = index;
+
+function initDataTable() {
+  dataTable = $('#example100').DataTable({
+    responsive: true,
+    lengthChange: false,
+    autoWidth: false,
+    searching: true
+  });
 }
 
 function confirmDelete(nis) {
@@ -360,49 +359,8 @@ function deleteConfirmed() {
   }
 }
 
-function refreshTable() {
-  fetch('pemilih_backend.php', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-    body: 'action=load'
-  })
-  .then(res => res.json())
-  .then(data => {
-    if ($.fn.DataTable.isDataTable('#example100')) {
-      $('#example100').DataTable().destroy();
-    }
-
-    const tbody = document.getElementById('tableBody');
-    tbody.innerHTML = '';
-    data.forEach((item, index) => {
-      tbody.innerHTML += `
-        <tr>
-          <td>${index + 1}</td>
-          <td>${item.nis}</td>
-          <td>${item.nama}</td>
-          <td>${item.jurusan}</td>
-          <td>${item.kelas}</td>
-          <td>${item.status_memilih}</td>
-          <td>${item.kode_akses}</td>
-          <td class="d-flex gap-1">
-            <button class="btn btn-sm btn-primary" onclick="editRow(${index})">Edit</button>
-            <button class="btn btn-sm btn-danger" onclick="confirmDelete('${item.nis}')">Hapus</button>
-          </td>
-        </tr>
-      `;
-    });
-
-    window.serverData = data;
-    initDataTable(); // Baru inisialisasi setelah data selesai dimasukkan
-  });
-}
-function initDataTable() {
-  dataTable = $('#example100').DataTable({
-    responsive: true,
-    lengthChange: false, // ini dimatikan supaya "Show entries" tidak muncul
-    autoWidth: false,
-    searching: true
-  });
+function editRow(index) {
+  showFormModal(index);
 }
 </script>
           <!-- /.row -->
